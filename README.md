@@ -12,14 +12,14 @@ The web configuration in `firebase.config.mjs` identifies the Firebase project. 
 
 In the [Firebase Console](https://console.firebase.google.com/project/desktop-6562f/overview), finish these settings before using hosted accounts and saved notes:
 
-1. Under **Authentication → Sign-in method**, enable **Email/Password**.
+1. Under **Authentication → Sign-in method**, enable **Email/Password** and **Google**. For Google, select the project support email and save.
 2. Under **Realtime Database → Rules**, publish the checked-in [database.rules.json](database.rules.json) for `desktop-6562f-default-rtdb`. These rules restrict each `user-desktops/{uid}` record to the Firebase account with that UID. [firebase.json](firebase.json) also points Firebase's deployment tools to this rules file.
 3. Under **Authentication → Settings → Authorized domains**, add the deployed Site's hostname if it is not listed.
 4. Confirm that Analytics is enabled for the project's web app if you want usage measurement.
 
 The Firebase plugin is not connected yet, and the account configuration remains pending. The initial Authentication configuration check returned `CONFIGURATION_NOT_FOUND`. An anonymous read of an empty database test path was allowed; the desktop deliberately blocks notes until private rules are published and anonymous access is denied. Having a project ID in the code does not enable sign-in or publish database rules.
 
-The hosted interface offers account creation, sign-in, and password-reset email. Once Firebase setup is complete, use the same Firebase account to access the same records across devices. A public Web Push VAPID key is saved in `firebase.config.mjs` for future notifications; notifications are not enabled by this version.
+The hosted interface offers **Continue with Google**, email/password account creation and sign-in, and password-reset email. Google sign-in requires popups to be allowed. Enable Google at https://console.firebase.google.com/project/desktop-6562f/authentication/providers and add `bossmans-desktop-v2-swift.violetpetal2.chatgpt.site` under Authentication → Settings → Authorized domains. Provider enablement and authorized domains are Firebase account settings; the source change alone does not apply them. Once Firebase setup is complete, use the same Firebase account to access the same records across devices. A public Web Push VAPID key is saved in `firebase.config.mjs` for future notifications; notifications are not enabled by this version.
 
 Target Site URL: <https://bossmans-desktop-v2-swift.violetpetal2.chatgpt.site>. This is the configured target; confirm deployment success before treating it as a live release.
 
