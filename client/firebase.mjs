@@ -1,6 +1,8 @@
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -268,6 +270,10 @@ function friendlyError(error) {
     "invalid-credential": [401, "The email or password is incorrect."],
     "wrong-password": [401, "The email or password is incorrect."],
     "user-not-found": [401, "The email or password is incorrect."],
+    "popup-blocked": [400, "Allow popups for this site, then try Google sign-in again."],
+    "popup-closed-by-user": [400, "Google sign-in was cancelled. Try again when ready."],
+    "cancelled-popup-request": [400, "A sign-in window is already open. Finish signing in there."],
+    "account-exists-with-different-credential": [409, "Sign in using your existing account’s sign-in method for this email."],
     "invalid-email": [400, "Enter a valid email address."],
     "email-already-in-use": [
       409,
@@ -279,7 +285,7 @@ function friendlyError(error) {
     ],
     "operation-not-allowed": [
       503,
-      "Email/password sign-in needs to be enabled in this Firebase project.",
+      "Enable the selected sign-in provider in Firebase Authentication.",
     ],
     "configuration-not-found": [
       503,
@@ -320,6 +326,18 @@ function friendlyError(error) {
     error.message || "The desktop could not complete that request.",
   ];
   return new AppError(status, message);
+}
+
+// Call directly from the click handler so the popup retains browser user activation.
+export async function signInWithGoogle() {
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    await signInWithPopup(auth, provider);
+    privacyCheck = undefined;
+  } catch (error) {
+    throw friendlyError(error);
+  }
 }
 
 export async function firebaseApi(path, options = {}) {
