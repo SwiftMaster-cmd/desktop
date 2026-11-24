@@ -632,6 +632,19 @@ $("#auth-form").addEventListener("submit", async (event) => {
     $("#auth-error").textContent = error.message;
   }
 });
+$("#google-sign-in").addEventListener("click", async () => {
+  if (!firebaseMode) return;
+  $("#auth-error").textContent = "";
+  try {
+    await busy($("#google-sign-in"), async () => {
+      await firebaseClient.signInWithGoogle();
+      state.configured = true;
+      await openDesktop();
+    });
+  } catch (error) {
+    $("#auth-error").textContent = error.message;
+  }
+});
 $("#auth-toggle").addEventListener("click", () => showAuth(!state.configured));
 $("#reset-password").addEventListener("click", async () => {
   $("#auth-error").textContent = "";
