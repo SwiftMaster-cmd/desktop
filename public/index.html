@@ -41,6 +41,16 @@
           <p class="muted" id="auth-description">
             Enter your password to pick up where you left off.
           </p>
+          <div id="email-wrap" hidden>
+            <label for="email">Email</label
+            ><input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+            />
+          </div>
           <label for="password">Password</label>
           <input
             id="password"
@@ -63,6 +73,13 @@
           <button id="auth-submit" class="button primary" type="submit">
             Open desktop
           </button>
+          <div id="firebase-auth-actions" hidden>
+            <button id="auth-toggle" class="button subtle" type="button">
+              Create an account</button
+            ><button id="reset-password" class="button subtle" type="button">
+              Forgot password?
+            </button>
+          </div>
           <p class="auth-note" id="auth-note">
             Personal data stays in this app’s database. Use Export backup to
             keep another copy.
@@ -330,8 +347,9 @@
         </button>
       </div>
       <p class="muted">
-        Add notes and shortcuts from a Desktop JSON backup (up to 1,000 items /
-        5 MB). Existing item IDs are skipped, so nothing gets overwritten.
+        Add notes and shortcuts from a Desktop JSON backup (up to
+        <span id="import-limit">1,000</span> items / 5 MB). Existing item IDs
+        are skipped, so nothing gets overwritten.
       </p>
       <label for="import-file" class="file-label">Choose a JSON backup</label
       ><input type="file" id="import-file" accept="application/json,.json" />

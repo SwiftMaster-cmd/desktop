@@ -1,3 +1,10 @@
+const firebaseMode =
+  typeof __FIREBASE_DESKTOP__ !== "undefined" && __FIREBASE_DESKTOP__;
+const firebaseClient = firebaseMode
+  ? await import("../client/firebase.mjs")
+  : null;
+const firebaseApi = firebaseClient?.firebaseApi;
+let stopRealtime = null;
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const paths = {
@@ -103,6 +110,18 @@ function toast(message) {
   }, 5000);
 }
 async function api(path, options = {}) {
+  if (firebaseApi) {
+    try {
+      return await firebaseApi(path, options);
+    } catch (error) {
+      if (
+        error.status === 401 &&
+        !["/api/login", "/api/setup", "/api/reset"].includes(path)
+      )
+        showAuth(true);
+      throw error;
+    }
+  }
   const response = await fetch(path, {
     ...options,
     headers: {
@@ -165,9 +184,37 @@ function showAuth(configured) {
   $("#confirm-password-wrap").hidden = configured;
   $("#confirm-password").required = !configured;
   $("#auth-error").textContent = "";
+  $("#email-wrap").hidden = !firebaseMode;
+  $("#email").required = firebaseMode;
+  $("#firebase-auth-actions").hidden = !firebaseMode;
+  if (firebaseMode) {
+    $("#auth-title").textContent = configured
+      ? "Open your desktop"
+      : "Create your account";
+    $("#auth-description").textContent = configured
+      ? "Sign in to access your notes and shortcuts on any device."
+      : "Use your email and a password with at least 10 characters.";
+    $("#auth-submit").textContent = configured ? "Sign in" : "Create account";
+    $("#auth-toggle").textContent = configured
+      ? "Create an account"
+      : "Already have an account? Sign in";
+    $("#reset-password").hidden = !configured;
+    $("#auth-note").textContent =
+      "Your notes are saved to your Firebase account. Export a backup whenever you need one.";
+  }
 }
 async function openDesktop() {
   await reload();
+  if (firebaseClient?.subscribeToItems) {
+    stopRealtime?.();
+    stopRealtime = await firebaseClient.subscribeToItems(
+      (items) => {
+        state.items = items;
+        render();
+      },
+      (error) => toast(error.message),
+    );
+  }
   $("#auth-screen").hidden = true;
   $("#loading").hidden = true;
   $("#desktop").hidden = false;
@@ -547,6 +594,7 @@ function openImport() {
 }
 async function boot() {
   hydrateIcons();
+  $("#import-limit").textContent = firebaseMode ? "250" : "1,000";
   try {
     const auth = await api("/api/auth");
     state.configured = auth.configured;
@@ -572,7 +620,10 @@ $("#auth-form").addEventListener("submit", async (event) => {
     await busy($("#auth-submit"), async () => {
       await api(state.configured ? "/api/login" : "/api/setup", {
         method: "POST",
-        body: JSON.stringify({ password: $("#password").value }),
+        body: JSON.stringify({
+          email: $("#email").value.trim(),
+          password: $("#password").value,
+        }),
       });
       state.configured = true;
       await openDesktop();
@@ -581,10 +632,32 @@ $("#auth-form").addEventListener("submit", async (event) => {
     $("#auth-error").textContent = error.message;
   }
 });
+$("#auth-toggle").addEventListener("click", () => showAuth(!state.configured));
+$("#reset-password").addEventListener("click", async () => {
+  $("#auth-error").textContent = "";
+  const email = $("#email").value.trim();
+  if (!email || !$("#email").checkValidity()) {
+    $("#auth-error").textContent = "Enter your email address first.";
+    $("#email").focus();
+    return;
+  }
+  try {
+    await busy($("#reset-password"), () =>
+      api("/api/reset", { method: "POST", body: JSON.stringify({ email }) }),
+    );
+    toast(
+      "If an account exists for that email, a password reset link is on its way.",
+    );
+  } catch (error) {
+    $("#auth-error").textContent = error.message;
+  }
+});
 $("#logout").addEventListener(
   "click",
   run(async () => {
     await api("/api/logout", { method: "POST", body: "{}" });
+    stopRealtime?.();
+    stopRealtime = null;
     state.items = [];
     showAuth(true);
     $("#password").focus();
@@ -781,9 +854,10 @@ $("#import-file").addEventListener("change", async (event) => {
       throw new Error("Choose a backup smaller than 5 MB.");
     const data = JSON.parse(await file.text());
     const items = Array.isArray(data) ? data : data.items;
-    if (!Array.isArray(items) || !items.length || items.length > 1000)
+    const limit = firebaseMode ? 250 : 1000;
+    if (!Array.isArray(items) || !items.length || items.length > limit)
       throw new Error(
-        "Choose a JSON backup containing between 1 and 1,000 items.",
+        `Choose a JSON backup containing between 1 and ${limit.toLocaleString()} items.`,
       );
     if (
       items.some(

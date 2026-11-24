@@ -1,0 +1,100 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "user-desktops": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid && newData.exists()",
+        ".validate": "newData.hasChildren(['items', 'revisions'])",
+        "items": {
+          "$itemId": {
+            ".validate": "newData.hasChildren(['id', 'title', 'kind', 'content', 'color', 'workspace', 'pinned', 'archived', 'createdAt', 'updatedAt', 'version']) && (!data.exists() ? newData.child('version').val() == 1 : ((newData.child('version').val() == data.child('version').val() + 1 && newData.child('createdAt').val() == data.child('createdAt').val()) || (newData.child('id').val() == data.child('id').val() && newData.child('title').val() == data.child('title').val() && newData.child('kind').val() == data.child('kind').val() && newData.child('content').val() == data.child('content').val() && newData.child('color').val() == data.child('color').val() && newData.child('workspace').val() == data.child('workspace').val() && newData.child('pinned').val() == data.child('pinned').val() && newData.child('archived').val() == data.child('archived').val() && newData.child('createdAt').val() == data.child('createdAt').val() && newData.child('updatedAt').val() == data.child('updatedAt').val() && newData.child('version').val() == data.child('version').val())))",
+            "id": {
+              ".validate": "newData.isString() && newData.val() == $itemId && $itemId.matches(/^[A-Za-z0-9_-]{1,128}$/)"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 160"
+            },
+            "kind": {
+              ".validate": "newData.val() == 'note' || newData.val() == 'link'"
+            },
+            "content": {
+              ".validate": "newData.isString() && newData.val().length <= 200000 && (newData.parent().child('kind').val() == 'note' || newData.val().matches(/^https?:\\/\\/.+$/))"
+            },
+            "color": {
+              ".validate": "newData.val() == 'blue' || newData.val() == 'violet' || newData.val() == 'teal' || newData.val() == 'amber' || newData.val() == 'rose'"
+            },
+            "workspace": {
+              ".validate": "newData.val() == 'Personal' || newData.val() == 'Minecraft' || newData.val() == 'Work' || newData.val() == 'People'"
+            },
+            "pinned": {
+              ".validate": "newData.isBoolean()"
+            },
+            "archived": {
+              ".validate": "newData.isBoolean()"
+            },
+            "createdAt": {
+              ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$/)"
+            },
+            "updatedAt": {
+              ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$/)"
+            },
+            "version": {
+              ".validate": "newData.isNumber() && newData.val() % 1 == 0 && newData.val() >= 1 && newData.val() <= 9007199254740991"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "revisions": {
+          "$itemId": {
+            "$version": {
+              ".validate": "newData.hasChildren(['id', 'title', 'kind', 'content', 'color', 'workspace', 'pinned', 'archived', 'createdAt', 'updatedAt', 'version']) && $version == newData.child('version').val() + '' && (!data.exists() || (newData.child('id').val() == data.child('id').val() && newData.child('title').val() == data.child('title').val() && newData.child('kind').val() == data.child('kind').val() && newData.child('content').val() == data.child('content').val() && newData.child('color').val() == data.child('color').val() && newData.child('workspace').val() == data.child('workspace').val() && newData.child('pinned').val() == data.child('pinned').val() && newData.child('archived').val() == data.child('archived').val() && newData.child('createdAt').val() == data.child('createdAt').val() && newData.child('updatedAt').val() == data.child('updatedAt').val() && newData.child('version').val() == data.child('version').val()))",
+              "id": {
+                ".validate": "newData.isString() && newData.val() == $itemId && $itemId.matches(/^[A-Za-z0-9_-]{1,128}$/)"
+              },
+              "title": {
+                ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 160"
+              },
+              "kind": {
+                ".validate": "newData.val() == 'note' || newData.val() == 'link'"
+              },
+              "content": {
+                ".validate": "newData.isString() && newData.val().length <= 200000 && (newData.parent().child('kind').val() == 'note' || newData.val().matches(/^https?:\\/\\/.+$/))"
+              },
+              "color": {
+                ".validate": "newData.val() == 'blue' || newData.val() == 'violet' || newData.val() == 'teal' || newData.val() == 'amber' || newData.val() == 'rose'"
+              },
+              "workspace": {
+                ".validate": "newData.val() == 'Personal' || newData.val() == 'Minecraft' || newData.val() == 'Work' || newData.val() == 'People'"
+              },
+              "pinned": {
+                ".validate": "newData.isBoolean()"
+              },
+              "archived": {
+                ".validate": "newData.isBoolean()"
+              },
+              "createdAt": {
+                ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$/)"
+              },
+              "updatedAt": {
+                ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$/)"
+              },
+              "version": {
+                ".validate": "newData.isNumber() && newData.val() % 1 == 0 && newData.val() >= 1 && newData.val() <= 9007199254740991"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}

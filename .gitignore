@@ -13,6 +13,11 @@ personal-notes/
 
 # Local tools and generated artifacts.
 node_modules/
+dist/
+outputs/
+.sites-runtime/
+.wrangler/
+.dev.vars*
 coverage/
 test-results/
 playwright-report/
