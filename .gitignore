@@ -1,0 +1,20 @@
+# Personal records, account credentials, and backups belong outside Git.
+.data/
+backups/
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+downloads/
+personal-notes/
+
+# Local tools and generated artifacts.
+node_modules/
+coverage/
+test-results/
+playwright-report/
+*.log
+.DS_Store

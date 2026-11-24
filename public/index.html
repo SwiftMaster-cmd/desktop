@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#172922" />
+    <meta
+      name="description"
+      content="Bossman's Desktop — a personal home for your notes, plans, and shortcuts."
+    />
+    <title>Bossman’s Desktop</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/app.mjs"></script>
+  </head>
+  <body>
+    <div id="loading" class="initial-loading" role="status">
+      Opening your desktop…
+    </div>
+    <section id="auth-screen" class="auth-screen" hidden>
+      <div class="auth-story">
+        <a class="brand" href="/" aria-label="Bossman's Desktop home"
+          ><span class="brand-symbol" aria-hidden="true">▦</span
+          ><span>Bossman’s<br /><strong>Desktop</strong></span></a
+        >
+        <div class="auth-intro">
+          <span class="eyebrow">A PLACE OF YOUR OWN</span>
+          <h1>Big plans.<br />Little reminders.<br />All together.</h1>
+          <p>
+            A personal home for the things you want to keep, work on, and come
+            back to.
+          </p>
+        </div>
+        <div class="auth-foot">YOUR NOTES. YOUR SPACE.</div>
+      </div>
+      <div class="auth-form-wrap">
+        <form id="auth-form" class="auth-card">
+          <span class="mini-mark" aria-hidden="true">▦</span>
+          <p class="eyebrow" id="auth-kicker">WELCOME HOME</p>
+          <h2 id="auth-title">Open your desktop</h2>
+          <p class="muted" id="auth-description">
+            Enter your password to pick up where you left off.
+          </p>
+          <label for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            maxlength="256"
+            required
+          />
+          <div id="confirm-password-wrap" hidden>
+            <label for="confirm-password">Confirm password</label
+            ><input
+              id="confirm-password"
+              type="password"
+              autocomplete="new-password"
+              maxlength="256"
+            />
+          </div>
+          <p id="auth-error" class="form-error" role="alert"></p>
+          <button id="auth-submit" class="button primary" type="submit">
+            Open desktop
+          </button>
+          <p class="auth-note" id="auth-note">
+            Personal data stays in this app’s database. Use Export backup to
+            keep another copy.
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <div id="desktop" class="desktop" hidden>
+      <aside id="sidebar" class="sidebar">
+        <a class="brand" href="/" aria-label="Bossman's Desktop home"
+          ><span class="brand-symbol" aria-hidden="true">▦</span
+          ><span>Bossman’s<br /><strong>Desktop</strong></span></a
+        >
+        <div class="sidebar-section-label">YOUR SPACE</div>
+        <nav aria-label="Desktop navigation" class="main-nav">
+          <button class="nav-item active" data-view="all">
+            <span data-icon="grid"></span><span>My desktop</span
+            ><span class="nav-count" id="all-count">0</span>
+          </button>
+          <button class="nav-item" data-view="pinned">
+            <span data-icon="pin"></span><span>Pinned</span
+            ><span class="nav-count" id="pinned-count">0</span>
+          </button>
+        </nav>
+        <div class="sidebar-section-label workspace-label">WORKSPACES</div>
+        <nav aria-label="Workspaces" id="workspace-nav" class="main-nav"></nav>
+        <div class="sidebar-bottom">
+          <button class="nav-item" data-view="trash">
+            <span data-icon="trash"></span><span>Trash</span
+            ><span class="nav-count" id="trash-count">0</span>
+          </button>
+          <div class="backup-card">
+            <span data-icon="shield"></span><strong>Keep a copy.</strong>
+            <p>Export your notes and shortcuts whenever you need.</p>
+            <button class="backup-link" id="sidebar-export">
+              Export backup <span data-icon="download"></span>
+            </button>
+          </div>
+          <div class="user-row">
+            <span class="avatar">B</span>
+            <div><strong>Bossman</strong><span>Personal desktop</span></div>
+            <button
+              id="logout"
+              class="icon-button light"
+              title="Lock desktop"
+              aria-label="Lock desktop"
+            >
+              <span data-icon="lock"></span>
+            </button>
+          </div>
+        </div>
+      </aside>
+      <div class="desktop-main">
+        <header class="topbar">
+          <button
+            id="menu-toggle"
+            class="icon-button mobile-menu"
+            aria-label="Toggle navigation"
+            aria-controls="sidebar"
+            aria-expanded="false"
+          >
+            <span data-icon="menu"></span>
+          </button>
+          <div class="breadcrumb">
+            My space <span>/</span>
+            <strong id="breadcrumb-current">My desktop</strong>
+          </div>
+          <div class="topbar-actions">
+            <span class="storage-status"><span></span>Database connected</span
+            ><button class="button subtle" id="import-button">
+              <span data-icon="upload"></span>Import
+            </button>
+          </div>
+        </header>
+        <main id="main-content">
+          <section class="page-heading">
+            <div>
+              <p class="eyebrow" id="page-kicker">A LITTLE MORE ORGANIZED</p>
+              <h1 id="page-title">Your desktop.</h1>
+              <p id="page-description">
+                A home for your ideas, plans, and everyday essentials.
+              </p>
+            </div>
+            <button class="button primary" id="new-item">
+              <span data-icon="plus"></span>New item
+            </button>
+          </section>
+          <section
+            id="workspace-cards"
+            class="workspace-cards"
+            aria-label="Browse your workspaces"
+          ></section>
+          <section class="library" aria-label="Saved items">
+            <div class="library-toolbar">
+              <div class="tabs" role="tablist" aria-label="Item type">
+                <button
+                  role="tab"
+                  aria-selected="true"
+                  data-kind="all"
+                  class="active"
+                >
+                  Everything <span id="filtered-count">0</span></button
+                ><button role="tab" aria-selected="false" data-kind="note">
+                  Notes</button
+                ><button role="tab" aria-selected="false" data-kind="link">
+                  Shortcuts
+                </button>
+              </div>
+              <div class="library-tools">
+                <label class="search-box"
+                  ><span data-icon="search"></span
+                  ><input
+                    type="search"
+                    id="search"
+                    placeholder="Find something…"
+                    aria-label="Search titles and content"
+                  /><kbd>/</kbd></label
+                ><select id="sort" aria-label="Sort items">
+                  <option value="updated">Recently updated</option>
+                  <option value="title">Title A–Z</option>
+                  <option value="created">Newest first</option>
+                </select>
+              </div>
+            </div>
+            <p id="result-summary" class="result-summary"></p>
+            <div id="item-grid" class="item-grid"></div>
+            <div id="empty-state" class="empty-state" hidden>
+              <div class="empty-icon" data-icon="note"></div>
+              <h2 id="empty-title">Start with one good note.</h2>
+              <p id="empty-description">
+                A plan for later, a thought worth keeping, or a link you use
+                every day.
+              </p>
+              <div class="empty-actions">
+                <button id="empty-note" class="button primary">
+                  <span data-icon="plus"></span>Create a note</button
+                ><button id="empty-link" class="button secondary">
+                  Add a shortcut
+                </button>
+              </div>
+            </div>
+          </section>
+          <footer class="page-footer">
+            <span>Make a little room for what’s next.</span
+            ><button id="footer-export">
+              Download a backup <span data-icon="download"></span>
+            </button>
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <dialog id="editor" class="editor-dialog" aria-labelledby="editor-heading">
+      <div class="dialog-header">
+        <div>
+          <span class="eyebrow" id="editor-kicker">MAKE IT YOURS</span>
+          <h2 id="editor-heading">New note</h2>
+        </div>
+        <button class="icon-button" id="editor-close" aria-label="Close item">
+          <span data-icon="close"></span>
+        </button>
+      </div>
+      <form id="editor-form">
+        <div id="type-picker" class="type-picker">
+          <button type="button" data-editor-kind="note" class="selected">
+            <span data-icon="note"></span>Note</button
+          ><button type="button" data-editor-kind="link">
+            <span data-icon="link"></span>Shortcut
+          </button>
+        </div>
+        <label for="item-title">Title</label
+        ><input
+          id="item-title"
+          maxlength="160"
+          placeholder="Give it a name"
+          required
+        />
+        <div class="form-columns">
+          <div>
+            <label for="item-workspace">Workspace</label
+            ><select id="item-workspace">
+              <option>Personal</option>
+              <option>Minecraft</option>
+              <option>Work</option>
+              <option>People</option>
+            </select>
+          </div>
+          <div>
+            <label for="item-color">Color</label
+            ><select id="item-color">
+              <option value="blue">Blue</option>
+              <option value="violet">Violet</option>
+              <option value="teal">Teal</option>
+              <option value="amber">Amber</option>
+              <option value="rose">Rose</option>
+            </select>
+          </div>
+        </div>
+        <label for="item-content" id="content-label">Your note</label
+        ><textarea
+          id="item-content"
+          rows="12"
+          maxlength="200000"
+          placeholder="Start anywhere…"
+        ></textarea>
+        <p class="field-help" id="content-help">
+          Plain text, with room to think. Changes save when you select Save.
+        </p>
+        <label class="checkbox-label"
+          ><input id="item-pinned" type="checkbox" /><span
+            data-icon="pin"
+          ></span
+          >Pin to the top</label
+        >
+        <p id="editor-error" class="form-error" role="alert"></p>
+        <div id="revision-panel" class="revision-panel" hidden>
+          <h3>Version history</h3>
+          <p class="muted">
+            Load a previous version, review it, then save to restore.
+          </p>
+          <div id="revision-list"></div>
+        </div>
+        <div class="editor-footer">
+          <div>
+            <button
+              class="button text-danger"
+              id="archive-item"
+              type="button"
+              hidden
+            >
+              Move to trash</button
+            ><button
+              class="button subtle"
+              id="show-history"
+              type="button"
+              hidden
+            >
+              <span data-icon="history"></span>History
+            </button>
+          </div>
+          <div>
+            <button class="button secondary" id="cancel-edit" type="button">
+              Cancel</button
+            ><button class="button primary" id="save-item" type="submit">
+              Save note
+            </button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog
+      id="import-dialog"
+      class="small-dialog"
+      aria-labelledby="import-heading"
+    >
+      <div class="dialog-header">
+        <div>
+          <span class="eyebrow">BRING YOUR THINGS</span>
+          <h2 id="import-heading">Import a backup</h2>
+        </div>
+        <button id="import-close" class="icon-button" aria-label="Close import">
+          <span data-icon="close"></span>
+        </button>
+      </div>
+      <p class="muted">
+        Add notes and shortcuts from a Desktop JSON backup (up to 1,000 items /
+        5 MB). Existing item IDs are skipped, so nothing gets overwritten.
+      </p>
+      <label for="import-file" class="file-label">Choose a JSON backup</label
+      ><input type="file" id="import-file" accept="application/json,.json" />
+      <div id="import-preview" class="import-preview" hidden></div>
+      <p id="import-error" class="form-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="button secondary" id="import-cancel">Cancel</button
+        ><button class="button primary" id="confirm-import" disabled>
+          Import items
+        </button>
+      </div>
+    </dialog>
+    <dialog
+      id="confirm-dialog"
+      class="small-dialog"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-description"
+    >
+      <div class="dialog-header">
+        <h2 id="confirm-title">Discard changes?</h2>
+      </div>
+      <p id="confirm-description">Your unsaved changes will be lost.</p>
+      <div class="dialog-actions">
+        <button class="button secondary" id="confirm-no">Keep editing</button
+        ><button class="button primary" id="confirm-yes">
+          Discard changes
+        </button>
+      </div>
+    </dialog>
+    <div id="toast" role="status" class="toast" hidden></div>
+  </body>
+</html>

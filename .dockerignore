@@ -1,0 +1,17 @@
+.git
+.github
+.data
+backups
+.env
+.env.*
+node_modules
+downloads
+personal-notes
+test
+test-results
+coverage
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.log
